@@ -32,7 +32,8 @@ public static class Program
             }
 
             // If year is not specified, no further validation is needed
-            if (year is not { Tokens.Count: 1 }) return;
+            if (year is not { Tokens.Count: 1 })
+                return;
 
             // Get the numeric value of the year
             var inputYear = result.GetValue(yearOption);
@@ -47,7 +48,8 @@ public static class Program
             }
 
             // If day is not specified, no further validation is needed
-            if (day is not { Tokens.Count: 1 }) return;
+            if (day is not { Tokens.Count: 1 })
+                return;
 
             // Get the numeric value of the day
             var inputDay = result.GetValue(dayOption);
@@ -65,8 +67,7 @@ public static class Program
         {
             var year = parseResult.GetValue(yearOption);
             var day = parseResult.GetValue(dayOption);
-            var result = Runner.TryRun(year, day);
-            return result ? 0 : 1;
+            Runner.Run(year == 0 ? null : year, day == 0 ? null : day);
         });
 
         // Add the "run" subcommand to the root command
