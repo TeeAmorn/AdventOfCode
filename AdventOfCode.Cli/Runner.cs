@@ -88,7 +88,7 @@ public static class Runner
     /// <summary>
     /// Runs all selected solutions, executes both parts, and prints results.
     /// </summary>
-    public static void Run(ushort? year, ushort? day)
+    public static void Run(ushort? year, ushort? day, bool useExample)
     {
         // Determine which solutions to run based on provided filters
         var descriptors = SolutionDescriptors.Where(descriptor =>
@@ -107,7 +107,7 @@ public static class Runner
             try
             {
                 // Load the input for this solution
-                var input = LoadInput(descriptor.Year, descriptor.Day);
+                var input = LoadInput(descriptor.Year, descriptor.Day, useExample);
 
                 // Execute both parts of the solution
                 foreach (var result in ExecuteSolution(solution, descriptor, input))
@@ -183,9 +183,10 @@ public static class Runner
     /// Loads the embedded input.txt file associated with a solution.
     /// Throws if the file does not exist or is empty.
     /// </summary>
-    private static string LoadInput(ushort year, ushort day)
+    private static string LoadInput(ushort year, ushort day, bool useExample)
     {
-        var resourceName = $"AdventOfCode.Solutions.Year{year}.Day{day:D2}.input.txt";
+        var fileName = useExample ? "example.txt" : "input.txt";
+        var resourceName = $"AdventOfCode.Solutions.Year{year}.Day{day:D2}.{fileName}";
 
         using var stream = SolutionAssembly.GetManifestResourceStream(resourceName);
         if (stream is null)

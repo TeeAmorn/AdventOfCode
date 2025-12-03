@@ -6,39 +6,58 @@ public static class Program
 {
     static async Task<int> Main(string[] args)
     {
-        // Create the root command for the CLI tool
+        // Root command for the CLI tool; displays this description in help output.
         var rootCommand = new RootCommand("Advent of Code Solver");
 
-        // Define a "run" subcommand for executing solutions
+        // Subcommand responsible for running one or more AoC solutions.
         var runCommand = new Command("run", "Run Advent of Code solutions");
 
-        // Add options to the "run" command
-        var yearOption = new Option<ushort>("--year", "-y") { Description = "Run solutions for a specific year" };
-        var dayOption = new Option<ushort>("--day", "-d") { Description = "Run solutions for the day" };
+        // Options that determine which solution(s) to run.
+        var yearOption = new Option<string>("--year", "-y")
+        {
+            Description = "Run solutions for the specified year"
+        };
+
+        var dayOption = new Option<string>("--day", "-d")
+        {
+            Description = "Run the solution for a specific day (requires --year)"
+        };
+
+        var exampleOption = new Option<bool>("--example", "-e")
+        {
+            Description = "Use example input instead of the real puzzle input"
+        };
+
         runCommand.Options.Add(yearOption);
         runCommand.Options.Add(dayOption);
+        runCommand.Options.Add(exampleOption);
 
-        // Add validation logic to ensure correct usage of the command
+        // Validation logic that enforces correct argument combinations
+        // and ensures referenced solutions actually exist.
         runCommand.Validators.Add(result =>
         {
-            var year = result.GetResult(yearOption);
-            var day = result.GetResult(dayOption);
+            var year = result.GetValue(yearOption);
+            var day = result.GetValue(dayOption);
 
-            // If day is specified but year is not, add an error
-            if (day is { Tokens.Count: 1 } && year is not { Tokens.Count: 1 })
+            // --day cannot be used without --year
+            if (day is not null && year is null)
             {
                 result.AddError("--day requires --year. Please specify --year <value>.");
                 return;
             }
 
-            // If year is not specified, no further validation is needed
-            if (year is not { Tokens.Count: 1 })
+            // If no --year is provided, nothing else to validate.
+            if (year is null)
                 return;
 
-            // Get the numeric value of the year
-            var inputYear = result.GetValue(yearOption);
+            // Validate that --year is a valid number
+            if (!ushort.TryParse(year, out var inputYear))
+            {
+                result.AddError("--year must be a number.");
+                return;
+            }
 
-            // If the specified year does not have solutions, add an error
+            // Ensure the specified year exists in the detected solution set
             if (!Runner.SolutionDescriptors
                     .Select(descriptor => descriptor.Year)
                     .Contains(inputYear))
@@ -47,36 +66,43 @@ public static class Program
                 return;
             }
 
-            // If day is not specified, no further validation is needed
-            if (day is not { Tokens.Count: 1 })
+            // If --day is omitted, validation is complete
+            if (day is null)
                 return;
 
-            // Get the numeric value of the day
-            var inputDay = result.GetValue(dayOption);
+            // Validate --day is numeric
+            if (!ushort.TryParse(day, out var inputDay))
+            {
+                result.AddError("--day must be a number.");
+                return;
+            }
 
-            // If the specified day does not exist for the year, add an error
+            // Ensure the specified day exists for the given year
             if (!Runner.SolutionDescriptors
                     .Where(descriptor => descriptor.Year == inputYear)
                     .Select(descriptor => descriptor.Day)
                     .Contains(inputDay))
+            {
                 result.AddError($"No solutions exist for day {inputDay} in year {inputYear}.");
+            }
         });
 
-        // Define the action to execute when the "run" command is invoked
+        // Define what to execute when "run" is invoked and validation succeeded.
         runCommand.SetAction(parseResult =>
         {
-            var year = parseResult.GetValue(yearOption);
-            var day = parseResult.GetValue(dayOption);
-            Runner.Run(year == 0 ? null : year, day == 0 ? null : day);
+            ushort? year = parseResult.GetValue(yearOption) is { } yearString ? ushort.Parse(yearString) : null;
+            ushort? day = parseResult.GetValue(dayOption) is { } dayString ? ushort.Parse(dayString) : null;
+            var useExample = parseResult.GetValue(exampleOption);
+            Runner.Run(year, day, useExample);
         });
 
-        // Add the "run" subcommand to the root command
+        // Attach "run" as a subcommand of the root.
         rootCommand.Subcommands.Add(runCommand);
 
-        // Parse the command-line arguments
+        // Parse the incoming CLI arguments.
         var parseResult = rootCommand.Parse(args);
 
-        // Invoke the parsed command asynchronously
+        // Execute the command asynchronously.
         return await parseResult.InvokeAsync();
     }
 }
