@@ -106,11 +106,8 @@ public static class Runner
         {
             try
             {
-                // Load the input for this solution
-                var input = LoadInput(descriptor.Year, descriptor.Day, useExample);
-
                 // Execute both parts of the solution
-                foreach (var result in ExecuteSolution(solution, descriptor, input))
+                foreach (var result in ExecuteSolution(solution, descriptor, useExample))
                     PrintResult(result);
             }
             catch (Exception ex)
@@ -180,46 +177,68 @@ public static class Runner
     }
 
     /// <summary>
-    /// Loads the embedded input.txt file associated with a solution.
-    /// Throws if the file does not exist or is empty.
-    /// </summary>
-    private static string LoadInput(ushort year, ushort day, bool useExample)
-    {
-        var fileName = useExample ? "example.txt" : "input.txt";
-        var resourceName = $"AdventOfCode.Solutions.Year{year}.Day{day:D2}.{fileName}";
-
-        using var stream = SolutionAssembly.GetManifestResourceStream(resourceName);
-        if (stream is null)
-        {
-            throw new InvalidOperationException(
-                $"Missing embedded input file: {resourceName}."
-            );
-        }
-
-        using var reader = new StreamReader(stream);
-        var content = reader.ReadToEnd();
-
-        // Require non-empty input content
-        if (string.IsNullOrWhiteSpace(content))
-        {
-            throw new InvalidOperationException(
-                $"Embedded input file '{resourceName}' is empty."
-            );
-        }
-
-        return content;
-    }
-
-    /// <summary>
     /// Executes both parts of a solution and yields their results.
     /// </summary>
     private static IEnumerable<ExecutionResult> ExecuteSolution(
         ISolution solution,
         SolutionDescriptor descriptor,
-        string input)
+        bool useExample)
     {
-        yield return ExecutePart(1, descriptor, () => solution.SolvePartOne(input));
-        yield return ExecutePart(2, descriptor, () => solution.SolvePartTwo(input));
+        yield return ExecutePart(1, descriptor, () =>
+        {
+            var input = LoadInput(descriptor.Year, descriptor.Day, useExample, 1);
+            return solution.SolvePartOne(input);
+        });
+
+        yield return ExecutePart(2, descriptor, () =>
+        {
+            var input = LoadInput(descriptor.Year, descriptor.Day, useExample, 2);
+            return solution.SolvePartTwo(input);
+        });
+    }
+
+    /// <summary>
+    /// Loads the embedded input file associated with a solution.
+    /// For example files, uses example2.txt for part 2 if it exists, otherwise falls back to example.txt.
+    /// Throws if the file does not exist or is empty.
+    /// </summary>
+    private static string LoadInput(ushort year, ushort day, bool useExample, ushort part)
+    {
+        var fileName = "input.txt";
+
+        if (useExample)
+        {
+            // For part 2, try example2.txt first, then fall back to example.txt
+            if (part == 2)
+            {
+                var example2ResourceName = $"AdventOfCode.Solutions.Year{year}.Day{day:D2}.example2.txt";
+                using var example2Stream = SolutionAssembly.GetManifestResourceStream(example2ResourceName);
+
+                if (example2Stream is not null)
+                {
+                    using var reader = new StreamReader(example2Stream);
+                    var content = reader.ReadToEnd();
+                    if (!string.IsNullOrWhiteSpace(content))
+                        return content;
+                }
+            }
+
+            fileName = "example.txt";
+        }
+
+        var resourceName = $"AdventOfCode.Solutions.Year{year}.Day{day:D2}.{fileName}";
+        using var stream = SolutionAssembly.GetManifestResourceStream(resourceName);
+
+        if (stream is null)
+            throw new InvalidOperationException($"Missing embedded input file: {resourceName}.");
+
+        using var reader2 = new StreamReader(stream);
+        var content2 = reader2.ReadToEnd();
+
+        // Require non-empty input content
+        return string.IsNullOrWhiteSpace(content2)
+            ? throw new InvalidOperationException($"Embedded input file '{resourceName}' is empty.")
+            : content2;
     }
 
     /// <summary>
