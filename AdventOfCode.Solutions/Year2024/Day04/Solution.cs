@@ -11,9 +11,11 @@ public class Solution : ISolution
         var rows = grid.GetLength(0);
         var cols = grid.GetLength(1);
 
-        return (from i in Enumerable.Range(0, rows)
-                from j in Enumerable.Range(0, cols)
-                select CountCrosswordsFrom(j, i, grid))
+        return (
+            from i in Enumerable.Range(0, rows)
+            from j in Enumerable.Range(0, cols)
+            select CountCrosswordsFrom(j, i, grid)
+        )
             .Sum()
             .ToString();
     }
@@ -24,10 +26,12 @@ public class Solution : ISolution
         var rows = grid.GetLength(0);
         var cols = grid.GetLength(1);
 
-        return (from i in Enumerable.Range(0, rows)
-                from j in Enumerable.Range(0, cols)
-                where FoundXWord(i, j, grid)
-                select 1)
+        return (
+            from i in Enumerable.Range(0, rows)
+            from j in Enumerable.Range(0, cols)
+            where FoundXWord(i, j, grid)
+            select 1
+        )
             .Sum()
             .ToString();
     }
@@ -71,13 +75,10 @@ public class Solution : ISolution
             (0, 1),
             (1, -1),
             (1, 0),
-            (1, 1)
+            (1, 1),
         ];
 
-        return (from d in deltas
-                where SearchDirection(i, j, d.di, d.dj, grid)
-                select 1)
-            .Sum();
+        return (from d in deltas where SearchDirection(i, j, d.di, d.dj, grid) select 1).Sum();
     }
 
     private static bool SearchDirection(int i, int j, int di, int dj, int[,] grid)
@@ -112,9 +113,9 @@ public class Solution : ISolution
 
         var leftDiagonal = new[] { grid[i - 1, j - 1], grid[i + 1, j + 1] };
         var rightDiagonal = new[] { grid[i - 1, j + 1], grid[i + 1, j - 1] };
-        return leftDiagonal.Contains(2) &&
-               leftDiagonal.Contains(4) &&
-               rightDiagonal.Contains(2) &&
-               rightDiagonal.Contains(4);
+        return leftDiagonal.Contains(2)
+            && leftDiagonal.Contains(4)
+            && rightDiagonal.Contains(2)
+            && rightDiagonal.Contains(4);
     }
 }

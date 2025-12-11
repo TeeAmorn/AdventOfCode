@@ -11,10 +11,9 @@ public class Solution : ISolution
 
         // Parse all rows except the last into a 2D grid of numbers
         var numberGrid = lines[..^1]
-            .Select(line => line
-                .Split(" ", StringSplitOptions.RemoveEmptyEntries)
-                .Select(ulong.Parse)
-                .ToArray())
+            .Select(line =>
+                line.Split(" ", StringSplitOptions.RemoveEmptyEntries).Select(ulong.Parse).ToArray()
+            )
             .ToArray();
 
         // Transpose the grid: convert rows to columns
@@ -27,10 +26,7 @@ public class Solution : ISolution
         var operators = lines[^1].Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
         // Apply each operation to its corresponding column and sum the results
-        return columnArrays
-            .Zip(operators, ApplyOperation)
-            .Aggregate((x, y) => x + y)
-            .ToString();
+        return columnArrays.Zip(operators, ApplyOperation).Aggregate((x, y) => x + y).ToString();
     }
 
     public string SolvePartTwo(string input)
@@ -66,16 +62,19 @@ public class Solution : ISolution
             .ToString();
     }
 
-    private static ulong ApplyOperation(IEnumerable<ulong> values, string operatorSymbol)
-        => operatorSymbol switch
+    private static ulong ApplyOperation(IEnumerable<ulong> values, string operatorSymbol) =>
+        operatorSymbol switch
         {
             "*" => values.Aggregate(1UL, (product, value) => product * value),
             "+" => values.Aggregate(0UL, (sum, value) => sum + value),
-            _ => throw new ArgumentException($"Unknown operator: {operatorSymbol}")
+            _ => throw new ArgumentException($"Unknown operator: {operatorSymbol}"),
         };
 
-    private static IEnumerable<(int startIndex, char operatorSymbol, int digitCount)> ParseOperatorPattern(
-        string pattern)
+    private static IEnumerable<(
+        int startIndex,
+        char operatorSymbol,
+        int digitCount
+    )> ParseOperatorPattern(string pattern)
     {
         // Find all positions where operators appear
         var operatorPositions = pattern
@@ -88,9 +87,8 @@ public class Solution : ISolution
         for (var i = 0; i < operatorPositions.Count; i++)
         {
             var currentPosition = operatorPositions[i];
-            var nextPosition = i < operatorPositions.Count - 1
-                ? operatorPositions[i + 1]
-                : pattern.Length;
+            var nextPosition =
+                i < operatorPositions.Count - 1 ? operatorPositions[i + 1] : pattern.Length;
             var digitCount = nextPosition - currentPosition - 1;
 
             yield return (currentPosition, pattern[currentPosition], digitCount);

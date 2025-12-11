@@ -9,8 +9,8 @@ public class Solution : ISolution
 
     public string SolvePartTwo(string input) => Solve(input, 12);
 
-    private static string Solve(string input, int outputLength)
-        => input
+    private static string Solve(string input, int outputLength) =>
+        input
             .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
             .Select(b => ExtractMaxDigitsSequentially(b, outputLength))
             .Select(ulong.Parse)
@@ -21,17 +21,17 @@ public class Solution : ISolution
     {
         // Convert string to array of digit values
         var digits = digitString.Select(c => (ulong)(c - '0')).ToArray();
-        
+
         var selectedDigits = new List<ulong>(outputLength);
         var searchStart = 0;
         for (var position = 0; position < outputLength; position++)
         {
             // Calculate how many more digits we need after this one
             var remainingNeeded = outputLength - position;
-            
+
             // Determine where we can search up to while leaving enough digits for future positions
             var searchEnd = digits.Length - remainingNeeded + 1;
-            
+
             // Extract the valid search range for this position
             var searchRange = digits[searchStart..searchEnd];
 

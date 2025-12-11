@@ -33,8 +33,9 @@ public static class Runner
     /// Regex used to extract year and day information from namespaces.
     /// Example namespace: AdventOfCode.Solutions.Year2024.Day01
     /// </summary>
-    private static readonly Regex SolutionRegex =
-        new(@"^AdventOfCode\.Solutions\.Year(?<year>\d{4})\.Day(?<day>\d{2})$");
+    private static readonly Regex SolutionRegex = new(
+        @"^AdventOfCode\.Solutions\.Year(?<year>\d{4})\.Day(?<day>\d{2})$"
+    );
 
     /// <summary>
     /// Gets a list of all available solutions in the assembly.
@@ -45,7 +46,8 @@ public static class Runner
         get
         {
             // Return cached value if already initialized
-            if (field != null) return field;
+            if (field != null)
+                return field;
 
             var builder = ImmutableList.CreateBuilder<SolutionDescriptor>();
 
@@ -91,11 +93,15 @@ public static class Runner
     public static void Run(ushort? year, ushort? day, bool useExample)
     {
         // Determine which solutions to run based on provided filters
-        var descriptors = SolutionDescriptors.Where(descriptor =>
-                year is null && day is null || // Run all solutions
-                day is null && descriptor.Year == year || // Run all for a given year
+        var descriptors = SolutionDescriptors
+            .Where(descriptor =>
+                year is null && day is null
+                || // Run all solutions
+                day is null && descriptor.Year == year
+                || // Run all for a given year
                 descriptor.Year == year && descriptor.Day == day // Run a specific solution
-        ).ToList();
+            )
+            .ToList();
 
         // Instantiate solution objects
         var solutions = LoadSolutions(descriptors)
@@ -115,14 +121,16 @@ public static class Runner
                 // If input fails (missing or empty), both parts are considered failed
                 foreach (ushort part in new[] { 1, 2 })
                 {
-                    PrintResult(new ExecutionResult(
-                        descriptor.Year,
-                        descriptor.Day,
-                        part,
-                        Success: false,
-                        Output: null,
-                        Exception: ex
-                    ));
+                    PrintResult(
+                        new ExecutionResult(
+                            descriptor.Year,
+                            descriptor.Day,
+                            part,
+                            Success: false,
+                            Output: null,
+                            Exception: ex
+                        )
+                    );
                 }
             }
         }
@@ -132,7 +140,9 @@ public static class Runner
     /// Instantiates all ISolution implementations described by the given descriptors.
     /// Any instantiation failures are aggregated and result in a single exception.
     /// </summary>
-    private static ImmutableList<ISolution> LoadSolutions(IEnumerable<SolutionDescriptor> descriptors)
+    private static ImmutableList<ISolution> LoadSolutions(
+        IEnumerable<SolutionDescriptor> descriptors
+    )
     {
         var solutions = ImmutableList.CreateBuilder<ISolution>();
         var failures = new List<(SolutionDescriptor Descriptor, Exception Exception)>();
@@ -145,10 +155,14 @@ public static class Runner
 
                 if (instance is null)
                 {
-                    failures.Add((descriptor,
-                        new InvalidOperationException(
-                            $"Activator returned null for type {descriptor.Type.FullName}"
-                        )));
+                    failures.Add(
+                        (
+                            descriptor,
+                            new InvalidOperationException(
+                                $"Activator returned null for type {descriptor.Type.FullName}"
+                            )
+                        )
+                    );
                     continue;
                 }
 
@@ -167,11 +181,14 @@ public static class Runner
 
         // Build error message summarizing all failures
         var message =
-            "Failed to instantiate one or more ISolution instances:\n" +
-            string.Join("\n", failures.Select(f =>
-                $"- Year {f.Descriptor.Year}, Day {f.Descriptor.Day}, Type {f.Descriptor.Type.FullName}\n" +
-                $"  Exception: {f.Exception.GetType().Name}: {f.Exception.Message}"
-            ));
+            "Failed to instantiate one or more ISolution instances:\n"
+            + string.Join(
+                "\n",
+                failures.Select(f =>
+                    $"- Year {f.Descriptor.Year}, Day {f.Descriptor.Day}, Type {f.Descriptor.Type.FullName}\n"
+                    + $"  Exception: {f.Exception.GetType().Name}: {f.Exception.Message}"
+                )
+            );
 
         throw new InvalidOperationException(message);
     }
@@ -182,19 +199,28 @@ public static class Runner
     private static IEnumerable<ExecutionResult> ExecuteSolution(
         ISolution solution,
         SolutionDescriptor descriptor,
-        bool useExample)
+        bool useExample
+    )
     {
-        yield return ExecutePart(1, descriptor, () =>
-        {
-            var input = LoadInput(descriptor.Year, descriptor.Day, useExample, 1);
-            return solution.SolvePartOne(input);
-        });
+        yield return ExecutePart(
+            1,
+            descriptor,
+            () =>
+            {
+                var input = LoadInput(descriptor.Year, descriptor.Day, useExample, 1);
+                return solution.SolvePartOne(input);
+            }
+        );
 
-        yield return ExecutePart(2, descriptor, () =>
-        {
-            var input = LoadInput(descriptor.Year, descriptor.Day, useExample, 2);
-            return solution.SolvePartTwo(input);
-        });
+        yield return ExecutePart(
+            2,
+            descriptor,
+            () =>
+            {
+                var input = LoadInput(descriptor.Year, descriptor.Day, useExample, 2);
+                return solution.SolvePartTwo(input);
+            }
+        );
     }
 
     /// <summary>
@@ -211,8 +237,11 @@ public static class Runner
             // For part 2, try example2.txt first, then fall back to example.txt
             if (part == 2)
             {
-                var example2ResourceName = $"AdventOfCode.Solutions.Year{year}.Day{day:D2}.example2.txt";
-                using var example2Stream = SolutionAssembly.GetManifestResourceStream(example2ResourceName);
+                var example2ResourceName =
+                    $"AdventOfCode.Solutions.Year{year}.Day{day:D2}.example2.txt";
+                using var example2Stream = SolutionAssembly.GetManifestResourceStream(
+                    example2ResourceName
+                );
 
                 if (example2Stream is not null)
                 {
@@ -248,7 +277,8 @@ public static class Runner
     private static ExecutionResult ExecutePart(
         ushort part,
         SolutionDescriptor descriptor,
-        Func<string> execute)
+        Func<string> execute
+    )
     {
         try
         {
@@ -292,7 +322,9 @@ public static class Runner
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"[FAIL] Year {result.Year} Day {result.Day:D2} Part {result.Part}:");
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine($"      {result.Exception?.GetType().Name}: {result.Exception?.Message}");
+            Console.WriteLine(
+                $"      {result.Exception?.GetType().Name}: {result.Exception?.Message}"
+            );
         }
 
         Console.ResetColor();

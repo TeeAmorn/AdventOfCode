@@ -8,7 +8,8 @@ public class Solution : ISolution
 {
     public string SolvePartOne(string input) => Solve(input, @"mul\((\d+),(\d+)\)");
 
-    public string SolvePartTwo(string input) => Solve(input, @"mul\((\d+),(\d+)\)|don't\(\)|do\(\)");
+    public string SolvePartTwo(string input) =>
+        Solve(input, @"mul\((\d+),(\d+)\)|don't\(\)|do\(\)");
 
     private static string Solve(string input, string regex)
     {
@@ -20,9 +21,11 @@ public class Solution : ISolution
                 {
                     ("don't()", _, _) => (false, acc.res),
                     ("do()", _, _) => (true, acc.res),
-                    (_, var res, true) =>
-                        (true, res + int.Parse(m.Groups[1].Value) * int.Parse(m.Groups[2].Value)),
-                    _ => acc
+                    (_, var res, true) => (
+                        true,
+                        res + int.Parse(m.Groups[1].Value) * int.Parse(m.Groups[2].Value)
+                    ),
+                    _ => acc,
                 },
             acc => acc.res.ToString()
         );

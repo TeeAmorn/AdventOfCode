@@ -15,17 +15,17 @@ public static class Program
         // Options that determine which solution(s) to run.
         var yearOption = new Option<string>("--year", "-y")
         {
-            Description = "Run solutions for the specified year"
+            Description = "Run solutions for the specified year",
         };
 
         var dayOption = new Option<string>("--day", "-d")
         {
-            Description = "Run the solution for a specific day (requires --year)"
+            Description = "Run the solution for a specific day (requires --year)",
         };
 
         var exampleOption = new Option<bool>("--example", "-e")
         {
-            Description = "Use example input instead of the real puzzle input"
+            Description = "Use example input instead of the real puzzle input",
         };
 
         runCommand.Options.Add(yearOption);
@@ -58,9 +58,11 @@ public static class Program
             }
 
             // Ensure the specified year exists in the detected solution set
-            if (!Runner.SolutionDescriptors
-                    .Select(descriptor => descriptor.Year)
-                    .Contains(inputYear))
+            if (
+                !Runner
+                    .SolutionDescriptors.Select(descriptor => descriptor.Year)
+                    .Contains(inputYear)
+            )
             {
                 result.AddError($"No solutions exist for year {inputYear}.");
                 return;
@@ -78,10 +80,12 @@ public static class Program
             }
 
             // Ensure the specified day exists for the given year
-            if (!Runner.SolutionDescriptors
-                    .Where(descriptor => descriptor.Year == inputYear)
+            if (
+                !Runner
+                    .SolutionDescriptors.Where(descriptor => descriptor.Year == inputYear)
                     .Select(descriptor => descriptor.Day)
-                    .Contains(inputDay))
+                    .Contains(inputDay)
+            )
             {
                 result.AddError($"No solutions exist for day {inputDay} in year {inputYear}.");
             }
@@ -90,8 +94,12 @@ public static class Program
         // Define what to execute when "run" is invoked and validation succeeded.
         runCommand.SetAction(parseResult =>
         {
-            ushort? year = parseResult.GetValue(yearOption) is { } yearString ? ushort.Parse(yearString) : null;
-            ushort? day = parseResult.GetValue(dayOption) is { } dayString ? ushort.Parse(dayString) : null;
+            ushort? year = parseResult.GetValue(yearOption) is { } yearString
+                ? ushort.Parse(yearString)
+                : null;
+            ushort? day = parseResult.GetValue(dayOption) is { } dayString
+                ? ushort.Parse(dayString)
+                : null;
             var useExample = parseResult.GetValue(exampleOption);
             Runner.Run(year, day, useExample);
         });

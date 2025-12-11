@@ -5,21 +5,24 @@ namespace AdventOfCode.Solutions.Year2025.Day02;
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
 public class Solution : ISolution
 {
-    public string SolvePartOne(string input)
-        => GetAllIds(input)
+    public string SolvePartOne(string input) =>
+        GetAllIds(input)
             .Where(i => IsRepeatedText(i.ToString(), 2))
             .Aggregate(0UL, ((x, y) => x + y))
             .ToString();
 
-    public string SolvePartTwo(string input)
-        => (from id in GetAllIds(input)
-                let idString = id.ToString()
-                let isInvalid = Enumerable
-                    .Range(1, idString.Length)
-                    .Any(length => IsRepeatedText(idString, length))
-                where isInvalid
-                select id)
-            .Aggregate(0UL, (current, id) => current + id).ToString();
+    public string SolvePartTwo(string input) =>
+        (
+            from id in GetAllIds(input)
+            let idString = id.ToString()
+            let isInvalid = Enumerable
+                .Range(1, idString.Length)
+                .Any(length => IsRepeatedText(idString, length))
+            where isInvalid
+            select id
+        )
+            .Aggregate(0UL, (current, id) => current + id)
+            .ToString();
 
     private static IEnumerable<ulong> GetAllIds(string input)
     {

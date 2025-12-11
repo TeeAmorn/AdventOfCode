@@ -80,8 +80,13 @@ public class Solution : ISolution
     private static int CountOccupiedNeighbors(int[,] grid, int row, int col)
     {
         // Count all 8 surrounding cells in a 3x3 grid around the target cell
-        return grid[row - 1, col - 1] + grid[row - 1, col] + grid[row - 1, col + 1] +
-               grid[row, col - 1] + grid[row, col + 1] +
-               grid[row + 1, col - 1] + grid[row + 1, col] + grid[row + 1, col + 1];
+        return grid[row - 1, col - 1]
+            + grid[row - 1, col]
+            + grid[row - 1, col + 1]
+            + grid[row, col - 1]
+            + grid[row, col + 1]
+            + grid[row + 1, col - 1]
+            + grid[row + 1, col]
+            + grid[row + 1, col + 1];
     }
 }

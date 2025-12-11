@@ -14,7 +14,8 @@ public class Solution : ISolution
         foreach (var rotation in rotations)
         {
             position = Mod(position + rotation, 100);
-            if (position == 0) count++;
+            if (position == 0)
+                count++;
         }
 
         return count.ToString();
@@ -42,9 +43,7 @@ public class Solution : ISolution
 
         // Check if partial rotation crosses zero
         var newPosition = position + (rotation % 100);
-        var crossesZero = rotation > 0
-            ? newPosition >= 100
-            : position != 0 && newPosition <= 0;
+        var crossesZero = rotation > 0 ? newPosition >= 100 : position != 0 && newPosition <= 0;
 
         return completeCycles + (crossesZero ? 1 : 0);
     }
@@ -56,6 +55,7 @@ public class Solution : ISolution
     }
 
     private static IEnumerable<int> GetRotations(string input) =>
-        input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+        input
+            .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
             .Select(line => int.Parse(line[1..]) * (line[0] == 'L' ? -1 : 1));
 }

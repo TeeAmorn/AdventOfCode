@@ -23,14 +23,17 @@ public class Solution : ISolution
         var (rangeSection, _) = ParseInputSections(input);
         var mergedRanges = MergeOverlappingRanges(rangeSection);
 
-        return mergedRanges
-            .Aggregate(0UL, (acc, range) => acc + range.Length)
-            .ToString();
+        return mergedRanges.Aggregate(0UL, (acc, range) => acc + range.Length).ToString();
     }
 
     private static (string ranges, string queries) ParseInputSections(string input) =>
-        input.Split($"{Environment.NewLine}{Environment.NewLine}", StringSplitOptions.RemoveEmptyEntries)
-            switch { var s => (s[0], s[1]) };
+        input.Split(
+            $"{Environment.NewLine}{Environment.NewLine}",
+            StringSplitOptions.RemoveEmptyEntries
+        ) switch
+        {
+            var s => (s[0], s[1]),
+        };
 
     private static IReadOnlyList<Range> MergeOverlappingRanges(string rangeSection)
     {
@@ -63,12 +66,14 @@ public class Solution : ISolution
         return merged;
     }
 
-
     private readonly record struct Range(ulong Start, ulong End)
     {
         public ulong Length => End - Start + 1;
+
         public bool Contains(ulong value) => value >= Start && value <= End;
+
         public bool OverlapsWith(Range other) => Start <= other.End + 1;
+
         public Range MergeWith(Range other) => new(Start: Start, End: Math.Max(End, other.End));
     }
 }

@@ -31,7 +31,8 @@ public class Solution : ISolution
     public string SolvePartTwo(string input)
     {
         var (manifold, beamStartIndex) = ParseInput(input);
-        return CountPath(beamStartIndex, 0, manifold.ToList(), new Dictionary<(int, int), ulong>()).ToString();
+        return CountPath(beamStartIndex, 0, manifold.ToList(), new Dictionary<(int, int), ulong>())
+            .ToString();
     }
 
     private static (IEnumerable<HashSet<int>> manifold, int beamStartIndex) ParseInput(string input)
@@ -46,7 +47,7 @@ public class Solution : ISolution
 
     private static IEnumerable<int> AllIndexesOf(string str, string value)
     {
-        for (var index = 0;; index += value.Length)
+        for (var index = 0; ; index += value.Length)
         {
             index = str.IndexOf(value, index, StringComparison.Ordinal);
             if (index == -1)
@@ -55,7 +56,12 @@ public class Solution : ISolution
         }
     }
 
-    private static ulong CountPath(int beam, int level, List<HashSet<int>> manifold, Dictionary<(int, int), ulong> seen)
+    private static ulong CountPath(
+        int beam,
+        int level,
+        List<HashSet<int>> manifold,
+        Dictionary<(int, int), ulong> seen
+    )
     {
         if (level == manifold.Count)
             return 1UL;
@@ -65,8 +71,9 @@ public class Solution : ISolution
 
         if (manifold[level].Contains(beam))
         {
-            var result = CountPath(beam - 1, level + 1, manifold, seen) +
-                         CountPath(beam + 1, level + 1, manifold, seen);
+            var result =
+                CountPath(beam - 1, level + 1, manifold, seen)
+                + CountPath(beam + 1, level + 1, manifold, seen);
             seen[(beam, level)] = result;
             return result;
         }

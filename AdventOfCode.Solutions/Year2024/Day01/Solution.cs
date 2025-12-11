@@ -20,10 +20,7 @@ public class Solution : ISolution
         left.Sort();
         right.Sort();
 
-        return left
-            .Zip(right, (l, r) => Math.Abs(l - r))
-            .Sum()
-            .ToString();
+        return left.Zip(right, (l, r) => Math.Abs(l - r)).Sum().ToString();
     }
 
     public string SolvePartTwo(string input)
@@ -42,8 +39,7 @@ public class Solution : ISolution
                 right[rightValue]++;
         }
 
-        return left
-            .Select(l => l * (right.TryGetValue(l, out var value) ? value : 0))
+        return left.Select(l => l * (right.TryGetValue(l, out var value) ? value : 0))
             .Sum()
             .ToString();
     }

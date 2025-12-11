@@ -36,7 +36,8 @@ public class Solution : ISolution
     private static ulong CountPaths(
         string node,
         Dictionary<string, HashSet<string>> graph,
-        Dictionary<string, ulong>? memo = null)
+        Dictionary<string, ulong>? memo = null
+    )
     {
         memo ??= new Dictionary<string, ulong>();
 
@@ -56,11 +57,13 @@ public class Solution : ISolution
         return total;
     }
 
-    private static ulong CountPathsWithRequirements(string node,
+    private static ulong CountPathsWithRequirements(
+        string node,
         Dictionary<string, HashSet<string>> graph,
         Dictionary<(string, bool, bool), ulong>? memo = null,
         bool visitedFft = false,
-        bool visitedDac = false)
+        bool visitedDac = false
+    )
     {
         memo ??= new Dictionary<(string, bool, bool), ulong>();
 
@@ -78,7 +81,9 @@ public class Solution : ISolution
         var newVisitedDac = visitedDac || node == "dac";
 
         var total = neighbors
-            .Select(neighbor => CountPathsWithRequirements(neighbor, graph, memo, newVisitedFft, newVisitedDac))
+            .Select(neighbor =>
+                CountPathsWithRequirements(neighbor, graph, memo, newVisitedFft, newVisitedDac)
+            )
             .Aggregate((a, b) => a + b);
 
         memo[state] = total;
