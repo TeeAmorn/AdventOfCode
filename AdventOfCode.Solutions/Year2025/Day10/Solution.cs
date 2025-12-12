@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Google.OrTools.LinearSolver;
 
 namespace AdventOfCode.Solutions.Year2025.Day10;
 
@@ -21,7 +22,69 @@ public class Solution : ISolution
 
     public string SolvePartTwo(string input)
     {
-        throw new NotImplementedException();
+        var machines = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+        return machines
+            .Select(ParseMachine)
+            .Select(machine =>
+            {
+                var lengthM = machine.TargetLights.Length;
+                var lengthN = machine.ButtonConfigurations.Length;
+
+                // Construct matrix A
+                var matrixA = new int[lengthM, lengthN];
+                for (var i = 0; i < lengthM; i++)
+                for (var j = 0; j < lengthN; j++)
+                    if (machine.ButtonConfigurations[j].Contains(i))
+                        matrixA[i, j] = 1;
+
+                // Construct vector b
+                var vectorB = new int[lengthM];
+                for (var i = 0; i < lengthM; i++)
+                    vectorB[i] = machine.JoltageRequirements[i];
+
+                // Initialize solver
+                var solver = Solver.CreateSolver("SCIP");
+                if (solver == null)
+                    throw new Exception("Could not create solver GLOP");
+
+                // Create variables x[0], x[1], ..., x[N-1] with non-negativity constraints
+                var x = new Variable[lengthN];
+                for (var j = 0; j < lengthN; j++)
+                    x[j] = solver.MakeIntVar(0.0, double.PositiveInfinity, $"x_{j}");
+
+                // Add constraints: Ax = b
+                for (var i = 0; i < lengthM; i++)
+                {
+                    var constraint = solver.MakeConstraint(
+                        vectorB[i],
+                        vectorB[i],
+                        $"constraint_{i}"
+                    );
+                    for (var j = 0; j < lengthN; j++)
+                        constraint.SetCoefficient(x[j], matrixA[i, j]);
+                }
+
+                // Objective: minimize sum of x
+                var objective = solver.Objective();
+                for (var j = 0; j < lengthN; j++)
+                    objective.SetCoefficient(x[j], 1.0);
+                objective.SetMinimization();
+
+                // Solve linear equations
+                var resultStatus = solver.Solve();
+                if (resultStatus != Solver.ResultStatus.OPTIMAL)
+                    throw new Exception(
+                        $"The problem does not have an optimal solution. Status: {resultStatus}"
+                    );
+                var result = new double[lengthN];
+                for (var j = 0; j < lengthN; j++)
+                    result[j] = Math.Round(x[j].SolutionValue());
+
+                return Convert.ToInt32(result.Aggregate((acc, n) => acc + n));
+            })
+            .Sum()
+            .ToString();
     }
 
     private static MachineConfiguration ParseMachine(string machineSpec)
@@ -50,7 +113,7 @@ public class Solution : ISolution
         int[][] buttonConfigurations
     )
     {
-        var initialState = new LightState(new bool[targetLights.Length], new List<int>());
+        var initialState = new LightState(new bool[targetLights.Length], []);
 
         var queue = new Queue<LightState>();
         queue.Enqueue(initialState);
