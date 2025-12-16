@@ -1,4 +1,3 @@
-using System.Data;
 using System.Diagnostics.CodeAnalysis;
 
 namespace AdventOfCode.Solutions.Year2025.Day07;

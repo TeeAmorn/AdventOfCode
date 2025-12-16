@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace AdventOfCode.Solutions.Year2025.Day05;

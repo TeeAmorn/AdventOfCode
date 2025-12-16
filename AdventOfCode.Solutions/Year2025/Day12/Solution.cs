@@ -39,6 +39,6 @@ public class Solution : ISolution
     {
         return "No part 2!";
     }
-}
 
-public record struct Region(int X, int Y, List<int> Requirements);
+    private record struct Region(int X, int Y, List<int> Requirements);
+}
